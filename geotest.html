@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+    <meta charset="utf-8" />
+    <title>La Fourchettesh</title>
+</head>
+<body id="index">
+<script>
+navigator.geolocation.getCurrentPosition(function (position) {
+    console.log(JSON.stringify(position));
+}, function () {
+    console.log(arguments);
+}, {
+    enableHighAccuracy: true
+});
+</script>
+</body>
+</html>
