@@ -10,13 +10,6 @@ var url = require('url'),
     contentTypes = require("./libraries/contentTypes").contentTypes;
 
 var MVC = function () {
-    this.settings = {
-        paths: {
-            "controllers": "./controllers",
-            "views": "./views"
-        }
-    };
-
     this.initialize();
 };
 MVC.prototype.initialize = function () {
@@ -33,8 +26,8 @@ MVC.prototype.handle = function (request, response) {
         //console.log(chunk);
     })
     .on('end', function() {
-        request.post = querystring.parse(_postData);
-        request.location = url.parse(request.url, true);
+        request.post = _postData;
+        request.get = url.parse(request.url, true).query;
         framework.dispatch(request, response);
     });
 };
@@ -49,8 +42,6 @@ MVC.prototype.dispatch = function (request, response) {
         this.dispatchStatic(request, response, routeInfo.filePath);
     } else {
         try {
-            request.get = request.location.query;
-            //console.log(request.get);
             request.cookie = Cookie.getCookie(request, response);
             //console.log(request.cookie.map);
             request.session = sessionStorage.getSession(request);
@@ -71,7 +62,7 @@ MVC.prototype.dispatch = function (request, response) {
 
 MVC.prototype.dispatchStatic = function (request, response, filePath) {
     var framework = this;
-    if(!filePath){
+    if (!filePath) {
         filePath = path.join(__dirname, "..", url.parse(request.url).pathname);
     }
     path.exists(filePath, function(exists) {
@@ -81,7 +72,6 @@ MVC.prototype.dispatchStatic = function (request, response, filePath) {
         }
 
         fs.readFile(filePath, "binary", function(err, file) {
-
             if(err) {
                 framework.handler500(request, response, err);
                 return;
@@ -95,12 +85,14 @@ MVC.prototype.dispatchStatic = function (request, response, filePath) {
         });
     });
 };
+
 MVC.prototype.handler500 = function(request, response, err){
     console.log("500: " + err);
     console.log("\t" + request.url);
     response.writeHead(500, {'Content-Type': 'text/plain'});
     response.end(err);
 };
+
 MVC.prototype.handler404 = function(request, response, err){
     console.log("404: " + request.url);
     response.writeHead(404, {'Content-Type': 'text/plain'});
